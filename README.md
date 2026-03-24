@@ -4,7 +4,37 @@
 
 ## Android Emulator AVD 是怎么装的
 
-这里用的是本机的 Android command line tools，而不是单独依赖 Android Studio 图形界面。先安装 `adb`、emulator 和对应的 command line tools，再下载 Android 35 的系统镜像，最后基于这个镜像创建了一个名叫 `tax35-arm64` 的 AVD。
+这里用的是本机的 Android command line tools，而不是单独依赖 Android Studio 图形界面。整套环境是先用 Homebrew 把基础工具装上，再用 Android SDK 自带的命令行工具把 emulator、平台组件和系统镜像装出来。
+
+基础工具安装命令大致如下：
+
+```bash
+brew install --cask android-commandlinetools
+brew install --cask android-platform-tools
+```
+
+安装完成后，再通过 `sdkmanager` 和 `avdmanager` 准备运行环境：
+
+```bash
+export ANDROID_SDK_ROOT=/opt/homebrew/share/android-commandlinetools
+
+yes | "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" --licenses
+
+"$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" \
+  "platforms;android-35" \
+  "system-images;android-35;google_apis;arm64-v8a" \
+  "emulator"
+
+"$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/avdmanager" create avd \
+  -n tax35-arm64 \
+  -k "system-images;android-35;google_apis;arm64-v8a"
+```
+
+平时手动启动模拟器的话，用的是这条：
+
+```bash
+/opt/homebrew/share/android-commandlinetools/emulator/emulator @tax35-arm64
+```
 
 这个 AVD 可以理解成一台预先配置好的“虚拟安卓手机”。后面无论是在终端里启动，还是通过这个 macOS 启动器启动，实际拉起的都是它。
 
